@@ -185,6 +185,8 @@ net localgroup administrators
 # Running processes (quick look)
 Get-Process | Sort-Object CPU -desc | Select -First 15 Name, Id, CPU
 
+```
+
 ---
 
 </details>
