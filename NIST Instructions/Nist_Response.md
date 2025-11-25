@@ -1,172 +1,104 @@
-# 🛡️ NIST Incident Response Instructions (Rev. 3 Aligned)
-**Author:** Zac Belchar  
-**Scope:** Practical, SOC-ready instructions aligned to **NIST SP 800-61 Rev. 3** (“Incident Response Recommendations and Considerations for Cybersecurity Risk Management”), integrated with SIEM/SOAR workflows.
+<a id="sec1"></a>
+<details>
+<summary><strong>🧱 1) NIST IR Lifecycle (Rev. 3)</strong> &nbsp; <img src="https://img.shields.io/badge/NIST-Lifecycle-0f4c81?style=flat-square" /></summary>
 
----
-
-## 🔭 0) Purpose & Audience
-This guide provides a compact, actionable playbook for a small SOC or solo analyst:
-
-- What to do **before**, **during**, and **after** an incident.  
-- Concrete steps, commands, and queries (Windows + Splunk examples).  
-- Documentation templates to demonstrate process maturity.
-
----
-
-## 🧱 1) NIST IR Lifecycle (Rev. 3)
 NIST emphasizes a **continuous, risk-managed** approach that ties into the CSF (Identify / Protect / Detect / Respond / Recover).
 
-1. **Preparation**  
-   - Policies, roles, contacts, tooling readiness (SIEM, SOAR, EDR, ticketing).  
-   - Runbooks, communications plan, evidence handling procedures, and tabletop exercises.
+1. **Preparation**
+   - Policies, roles, contacts, tooling readiness (SIEM, SOAR, EDR, ticketing)
+   - Runbooks, communications plans, evidence handling procedures
+   - Tabletop exercises
 
-2. **Detection & Analysis**  
-   - Centralize telemetry (logs, alerts).  
-   - Triage → validate → scope → classify (incident vs. event).  
-   - Use threat intelligence + MITRE ATT&CK mapping.
+2. **Detection & Analysis**
+   - Centralize telemetry  
+   - Triage → validate → scope → classify  
+   - Use threat intel + MITRE ATT&CK mapping
 
-3. **Containment, Eradication, Recovery**  
-   - Short-term containment and evidence capture.  
-   - Remove root cause, patch/harden systems.  
-   - Recover to a known-good state and enhance monitoring.
+3. **Containment, Eradication, Recovery**
+   - Contain threats, capture evidence  
+   - Remove root causes, patch systems  
+   - Recover to known-good state
 
-4. **Post-Incident Activity (Continuous Improvement)**  
-   - Capture lessons learned, identify control gaps, and update detections/playbooks.  
-   - Track metrics (MTTD/MTTR, false-positive rates).
+4. **Post-Incident Activity**
+   - Lessons learned  
+   - Improve controls + detections  
+   - Track metrics (MTTD/MTTR)
+
+</details>
 
 ---
 
-## 🧭 2) Roles & Responsibilities
+<a id="sec2"></a>
+<details>
+<summary><strong>🧭 2) Roles & Responsibilities</strong> &nbsp; <img src="https://img.shields.io/badge/Roles-Defined-blue?style=flat-square" /></summary>
+
 | Role | Primary Duties | Backup |
 |------|----------------|--------|
-| IR Lead | Declare severity, approve containment, handle external comms | Deputy / On-call L2 |
-| Tier 1 Analyst | Validate alerts, open tickets, collect initial evidence | Any analyst |
-| Tier 2/3 Investigator | Hunt, scope, plan containment, manage evidence | IR Lead |
-| Communications | Stakeholder updates, legal/PR coordination | IR Lead |
-| Forensics | Imaging, chain of custody, timeline reconstruction | Investigator |
+| IR Lead | Declare severity, approve actions, external comms | Deputy / L2 |
+| Tier 1 Analyst | Validate alerts, triage events | Any analyst |
+| Investigator (T2/T3) | Hunt, scope, isolate hosts, gather evidence | IR Lead |
+| Communications | Stakeholder updates, PR/legal coordination | IR Lead |
+| Forensics | Imaging, chain of custody, reconstruction | Investigator |
+
+</details>
 
 ---
 
-## 🚦 3) Severity & Classification
-| Severity | Definition | Initial Actions |
-|-----------|-------------|-----------------|
-| **SEV-1** | Ongoing compromise, business-critical impact | Isolate hosts, activate IR war room, hourly updates |
-| **SEV-2** | Confirmed compromise, limited scope | Contain, daily updates, perform forensic capture |
-| **SEV-3** | Suspected compromise / anomaly | Increase monitoring, perform targeted hunting |
-| **SEV-4** | False positive / benign event | Tune detections, close with analyst notes |
+<a id="sec3"></a>
+<details>
+<summary><strong>🚦 3) Severity & Classification</strong> &nbsp; <img src="https://img.shields.io/badge/Severity-Matrix-orange?style=flat-square" /></summary>
 
-**Classification Tags:** `Phishing`, `Malware`, `Ransomware`, `Data Exfil`, `Privilege Abuse`, `C2`, `Web App`, `Insider`, `Supply Chain`
+| Severity | Meaning | Initial Steps |
+|---------|---------|----------------|
+| **SEV-1** | Active compromised environment | Isolate hosts, war room |
+| **SEV-2** | Confirmed compromise | Contain, collect evidence |
+| **SEV-3** | Suspicious activity | Monitor + hunt |
+| **SEV-4** | False positive | Tune rule, close ticket |
 
----
+**Classification tags:**  
+`Malware`, `Phishing`, `C2`, `Ransomware`, `Privilege Abuse`, `Web Attack`, `Insider`, `Data Exfil`
 
-## 🧰 4) Preparation Checklist
-- [ ] SIEM connected to key sources: Windows, Sysmon, Firewall, EDR, DNS, Proxy  
-- [ ] SOAR playbooks tested: IP/domain enrichment, host isolation, mailbox purge  
-- [ ] Ticketing templates ready (IR, Problem, Change)  
-- [ ] Contact trees (IT, Legal, HR, PR) current and verified  
-- [ ] Evidence handling SOP and chain-of-custody form in place  
-- [ ] Tabletop exercise completed within last 6 months  
+</details>
 
 ---
 
-## 🔎 5) Detection & Triage (Quick Flow)
-1. **Acknowledge alert** → log ticket, stamp time/owner  
-2. **Validate** → false positive? context? change window?  
-3. **Scope** → what hosts/users/credentials are impacted? lateral movement?  
-4. **Classify + Set SEV** → escalate to IR Lead if SEV-2 or higher  
-5. **Decide:** monitor vs. contain  
+<a id="sec4"></a>
+<details>
+<summary><strong>🧰 4) Preparation Checklist</strong> &nbsp; <img src="https://img.shields.io/badge/Preparation-Checklist-success?style=flat-square" /></summary>
 
-**Key triage questions:**
-- What changed before the alert?  
-- Is this isolated or widespread?  
-- Any unusual outbound traffic or data exfil?
-
----
-
-## 🧪 6) Practical Queries (Windows + Splunk SPL)
-
-### 🪟 Windows (PowerShell)
-# 🛡️ NIST Incident Response Instructions (Rev. 3 Aligned)
-**Author:** Zac Belchar  
-**Scope:** Practical, SOC-ready instructions aligned to **NIST SP 800-61 Rev. 3** (“Incident Response Recommendations and Considerations for Cybersecurity Risk Management”), integrated with SIEM/SOAR workflows.
-
----
-
-## 🔭 0) Purpose & Audience
-This guide provides a compact, actionable playbook for a small SOC or solo analyst:
-
-- What to do **before**, **during**, and **after** an incident.  
-- Concrete steps, commands, and queries (Windows + Splunk examples).  
-- Documentation templates to demonstrate process maturity.
-
----
-
-## 🧱 1) NIST IR Lifecycle (Rev. 3)
-NIST emphasizes a **continuous, risk-managed** approach that ties into the CSF (Identify / Protect / Detect / Respond / Recover).
-
-1. **Preparation**  
-   - Policies, roles, contacts, tooling readiness (SIEM, SOAR, EDR, ticketing).  
-   - Runbooks, communications plan, evidence handling procedures, and tabletop exercises.
-
-2. **Detection & Analysis**  
-   - Centralize telemetry (logs, alerts).  
-   - Triage → validate → scope → classify (incident vs. event).  
-   - Use threat intelligence + MITRE ATT&CK mapping.
-
-3. **Containment, Eradication, Recovery**  
-   - Short-term containment and evidence capture.  
-   - Remove root cause, patch/harden systems.  
-   - Recover to a known-good state and enhance monitoring.
-
-4. **Post-Incident Activity (Continuous Improvement)**  
-   - Capture lessons learned, identify control gaps, and update detections/playbooks.  
-   - Track metrics (MTTD/MTTR, false-positive rates).
-
----
-
-## 🧭 2) Roles & Responsibilities
-| Role | Primary Duties | Backup |
-|------|----------------|--------|
-| IR Lead | Declare severity, approve containment, handle external comms | Deputy / On-call L2 |
-| Tier 1 Analyst | Validate alerts, open tickets, collect initial evidence | Any analyst |
-| Tier 2/3 Investigator | Hunt, scope, plan containment, manage evidence | IR Lead |
-| Communications | Stakeholder updates, legal/PR coordination | IR Lead |
-| Forensics | Imaging, chain of custody, timeline reconstruction | Investigator |
-
----
-
-## 🚦 3) Severity & Classification
-| Severity | Definition | Initial Actions |
-|-----------|-------------|-----------------|
-| **SEV-1** | Ongoing compromise, major impact | Isolate hosts, IR war room |
-| **SEV-2** | Confirmed compromise | Contain + forensic capture |
-| **SEV-3** | Suspicious behavior | Monitor + targeted hunting |
-| **SEV-4** | False positive | Tune rule + close |
-
-**Classification Tags:** `Phishing`, `Malware`, `Ransomware`, `Privilege Abuse`, `Data Exfil`, `C2`, `Insider Threat`
-
----
-
-## 🧰 4) Preparation Checklist
-- [ ] SIEM connected to critical log sources  
+- [ ] SIEM connected to all critical log sources  
 - [ ] SOAR playbooks tested  
-- [ ] Ticketing templates ready  
-- [ ] Contact trees updated  
-- [ ] Evidence handling SOP verified  
-- [ ] Tabletop exercise completed  
+- [ ] Ticket templates ready  
+- [ ] Updated IR contact lists  
+- [ ] Evidence handling SOPs  
+- [ ] Tabletop exercise < 6 months
+
+</details>
 
 ---
 
-## 🔎 5) Detection & Triage (Quick Flow)
+<a id="sec5"></a>
+<details>
+<summary><strong>🔎 5) Detection & Triage (Quick Flow)</strong> &nbsp; <img src="https://img.shields.io/badge/Triage-Workflow-yellow?style=flat-square" /></summary>
+
 1. Acknowledge alert → timestamp + owner  
-2. Validate → false positive? context?  
-3. Scope → hosts/users/infrastructure  
-4. Classify + SEV  
+2. Validate context → false positive?  
+3. Scope → hosts/users/infra  
+4. Assign SEV level  
 5. Decide: monitor vs contain  
 
+**Questions to ask:**
+- What changed before the alert?  
+- One host or many?  
+- Any suspicious outbound traffic?  
+
+</details>
+
 ---
 
-## 🧪 6) Practical Queries (Windows + Splunk SPL)
+<a id="sec6"></a>
+<details>
+<summary><strong>🧪 6) Practical Queries (Windows + Splunk)</strong> &nbsp; <img src="https://img.shields.io/badge/Queries-Useful-blueviolet?style=flat-square" /></summary>
 
 ### 🪟 Windows (PowerShell)
 
@@ -182,7 +114,7 @@ Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operationa
 # Local admins
 net localgroup administrators
 
-# Running processes (quick look)
+# Running processes
 Get-Process | Sort-Object CPU -desc | Select -First 15 Name, Id, CPU
 
 ```
