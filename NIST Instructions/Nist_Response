@@ -1,0 +1,217 @@
+# NIST Incident Response Instructions (Rev. 3 Aligned)
+**Author:** Zac Belchar  
+**Scope:** Practical, SOC-ready instructions aligned to **NIST SP 800-61 Rev. 3** (“Incident Response Recommendations and Considerations for Cybersecurity Risk Management”), integrated with SIEM/SOAR workflows.
+
+---
+
+## 🔭 0) Purpose & Audience
+This guide gives a compact, actionable playbook for a small SOC or solo analyst:
+- What to do **before**, **during**, and **after** an incident.
+- Concrete steps, commands, and queries (Windows + Splunk examples).
+- Documentation templates to prove process maturity.
+
+---
+
+## 🧱 1) NIST IR Lifecycle (Rev. 3)
+NIST emphasizes a **continuous, risk-managed** approach that ties into the CSF (Identify/Protect/Detect/Respond/Recover).
+
+1. **Preparation**
+   - Policies, roles, contacts, tooling readiness (SIEM, SOAR, EDR, ticketing).
+   - Runbooks, comms plan, evidence handling procedures, table-top exercises.
+
+2. **Detection & Analysis**
+   - Centralize telemetry (logs/alerts).
+   - Triage → validate → scope → classify (incident vs. event).
+   - Use threat intel + ATT&CK mapping.
+
+3. **Containment, Eradication, Recovery**
+   - Short-term containment, evidence capture.
+   - Remove root cause, patch/harden.
+   - Recover to known-good state; enhance monitoring.
+
+4. **Post-Incident Activity (Continuous Improvement)**
+   - Lessons learned, control gaps, update detections/playbooks.
+   - Track metrics (MTTD/MTTR, false-positive rates).
+
+---
+
+## 🧭 2) Roles & Responsibilities (sample)
+| Role | Primary Duties | Backup |
+|---|---|---|
+| IR Lead | Declare/severity, approvals, external comms | Deputy/On-call L2 |
+| Triage (Tier 1) | Validate alerts, open tickets, collect initial facts | Any analyst |
+| Investigator (Tier 2/3) | Hunt, scope, containment plan, evidencing | IR Lead |
+| Comms | Stakeholder updates, legal/PR coordination | IR Lead |
+| Forensics | Imaging, chain of custody, timeline | Investigator |
+
+---
+
+## 🚦 3) Severity & Classification (example)
+| Severity | Definition | Initial Actions |
+|---|---|---|
+| **SEV-1** | Ongoing compromise, business critical impact | Isolate hosts, IR war room, hourly updates |
+| **SEV-2** | Confirmed compromise, limited scope | Contain, daily updates, forensic capture |
+| **SEV-3** | Suspected compromise / high-risk anomaly | Intensify monitoring, targeted hunting |
+| **SEV-4** | Benign event / false positive | Tune detections, close with notes |
+
+**Classification tags:** `Phishing`, `Malware`, `Ransomware`, `Data Exfil`, `Privilege Abuse`, `C2`, `Web App`, `Insider`, `Supply Chain`.
+
+---
+
+## 🧰 4) Preparation Checklist
+- [ ] SIEM connected to key sources: Windows Security, Sysmon, firewall, EDR, DNS, proxy.
+- [ ] SOAR playbooks tested: IP/domain enrichment, host isolate, user disable, mailbox purge.
+- [ ] Ticketing templates ready (IR, Problem, Change).
+- [ ] Contact trees (IT, Legal, HR, PR) up-to-date.
+- [ ] Evidence handling SOP + chain-of-custody form.
+- [ ] Table-top exercise done < 6 months.
+
+---
+
+## 🔎 5) Detection & Triage (quick flow)
+1. **Acknowledge alert** → log ticket, stamp time/owner.
+2. **Validate** (false positive? known good?):
+   - Reputation checks (VT, URLhaus), context (change window?), user confirmation.
+3. **Scope**:
+   - What hosts/users/credentials? Lateral movement? Persistence?
+4. **Classify + Set SEV** → notify IR Lead if SEV-2/1.
+5. **Decide**: monitor vs. contain.
+
+**Key triage questions**
+- What changed shortly before the alert?
+- Single host or many? Same user context?
+- Any data movement (unusual egress/DLP hits)?
+
+---
+
+## 🧪 6) Practical Queries (Windows + Splunk SPL)
+
+### Windows (PowerShell)
+```powershell
+# Failed logons (4625)
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 100 |
+  Select TimeCreated, Id, ProviderName, @{n='User';e={$_.Properties[5].Value}}, Message
+
+# PowerShell Script Block Logging (4104)
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational'; Id=4104} |
+  Select TimeCreated, Id, Message
+
+# Local admins
+net localgroup administrators
+
+# Running processes (quick look)
+Get-Process | Sort-Object CPU -desc | Select -First 15 Name, Id, CPU
+---
+
+## 🧯 7) Containment → Eradication → Recovery
+
+### Containment Options
+- **Network:** Block IP/domain, geofence, sinkhole DNS.
+- **Endpoint:** Isolate host (EDR), kill process, disable account.
+- **Email:** Purge phishing messages, block sender/domain.
+- **Identity:** Force password reset, revoke tokens, disable MFA sessions.
+
+### Eradication
+- Remove malware/persistence, patch vulnerable components, reset creds.
+- Confirm with rescans & clean baselines.
+
+### Recovery
+- Restore services in phases.
+- Increase logging on affected assets.
+- Post-recovery validation (no callbacks, clean telemetry).
+
+---
+
+## 🧪 8) Evidence Handling & Forensics (Lightweight)
+
+- **Preserve first:** memory and volatile logs.
+- **Record:** who/what/when/where/why/how (chain of custody).
+- **Collect:** disk image (if needed), logs, EDR timelines, firewall flows, registry keys.
+- **Hash** artifacts (SHA256) and store securely.
+
+**Chain of Custody Template:**
+
+
+---
+
+## 🤖 9) SOAR Playbook Skeletons
+
+### A) IP Enrichment & Action
+1. **Trigger:** SIEM alert with `src_ip`.
+2. **Steps:**
+   - Enrich IP (VirusTotal, OTX, GreyNoise).
+   - If reputation ≥ threshold → open ticket, notify Slack/Teams.
+   - If internal host observed → EDR isolate + block on firewall.
+3. **Close:** Attach artifacts (IOCs, case link).
+
+### B) Suspected Phishing
+1. **Trigger:** User-reported email or EOP alert.
+2. **Steps:**
+   - URL/domain reputation → screenshot sandbox (if safe).
+   - Search tenant → purge matching emails.
+   - Reset creds for affected users.
+3. **Notify:** Send user awareness update and close case.
+
+> Store playbook JSON/YAML or screenshots in `Labs/Playbooks/`.
+
+---
+
+## 🗣️ 10) Communication Templates
+
+### Internal Stakeholder Update (SEV-2)
+
+
+---
+
+## 🧭 12) ATT&CK Mapping (Quick Reference)
+
+| Tactic | Examples |
+|---|---|
+| Initial Access | T1566 Phishing, T1190 Exploit Public-Facing App |
+| Execution | T1059 Command and Scripting Interpreter (PowerShell) |
+| Persistence | T1547 Boot/Logon Autostart, T1068 Exploitation for Privilege |
+| Privilege Escalation | T1068, T1548 Abuse Elevation Control Mechanism |
+| Defense Evasion | T1562 Impair Defenses |
+| Discovery | T1087 Account Discovery, T1057 Process Discovery |
+| Lateral Movement | T1021 Remote Services (RDP/SMB) |
+| C2 | T1071 Application Layer Protocol (HTTPS/DNS) |
+| Collection/Exfil | T1041 Exfil over C2 Channel |
+
+---
+
+## 🧩 13) CMMC / NIST 800-171 Tie-ins
+
+| Control Family | Purpose | Example |
+|---|---|---|
+| IR.L2-3.6.x | Incident Response planning & reporting | Runbooks, lessons learned docs |
+| AU.L2-3.3.x | Audit & Accountability | Central log retention and review |
+| AC / IA / CM | Access, Identity, Configuration | Disable accounts, enforce MFA, patching |
+
+---
+
+## 📊 14) Metrics & Continuous Improvement
+
+Track monthly:
+- **MTTD / MTTR** – Time to detect / respond.
+- **% incidents by class/severity**.
+- **False-positive rate per rule**.
+- **Playbook execution time**.
+- **Top 5 tuned detections (before/after)**.
+
+---
+
+## ✅ 15) Quick "Go Bag" (Field Checklist)
+
+**When in doubt:**
+1. Confirm alert → open ticket with timestamp & owner.  
+2. Snapshot scope (hosts/users) → set SEV → notify IR Lead.  
+3. Contain high-risk IOCs (block/isolate) and preserve evidence.  
+4. Eradicate, recover, and verify clean telemetry.  
+5. Write report → add lessons learned → update playbooks/rules.
+
+---
+
+### Appendix A – Useful Links
+- [NIST SP 800-61 Rev. 3 (Final)](https://csrc.nist.gov/pubs/sp/800/61/r3/final)
+- [MITRE ATT&CK Matrix](https://attack.mitre.org/)
+- [Splunk SOAR Playbook Examples](https://github.com/splunk/soar-playbook-examples)
