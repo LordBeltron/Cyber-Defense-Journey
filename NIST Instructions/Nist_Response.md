@@ -86,10 +86,89 @@ NIST emphasizes a **continuous, risk-managed** approach that ties into the CSF (
 ## 🧪 6) Practical Queries (Windows + Splunk SPL)
 
 ### 🪟 Windows (PowerShell)
-```powershell
-# Failed logons (4625)
-Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 100 |
-  Select TimeCreated, Id, ProviderName, @{n='User';e={$_.Properties[5].Value}}, Message
+# 🛡️ NIST Incident Response Instructions (Rev. 3 Aligned)
+**Author:** Zac Belchar  
+**Scope:** Practical, SOC-ready instructions aligned to **NIST SP 800-61 Rev. 3** (“Incident Response Recommendations and Considerations for Cybersecurity Risk Management”), integrated with SIEM/SOAR workflows.
+
+---
+
+## 🔭 0) Purpose & Audience
+This guide provides a compact, actionable playbook for a small SOC or solo analyst:
+
+- What to do **before**, **during**, and **after** an incident.  
+- Concrete steps, commands, and queries (Windows + Splunk examples).  
+- Documentation templates to demonstrate process maturity.
+
+---
+
+## 🧱 1) NIST IR Lifecycle (Rev. 3)
+NIST emphasizes a **continuous, risk-managed** approach that ties into the CSF (Identify / Protect / Detect / Respond / Recover).
+
+1. **Preparation**  
+   - Policies, roles, contacts, tooling readiness (SIEM, SOAR, EDR, ticketing).  
+   - Runbooks, communications plan, evidence handling procedures, and tabletop exercises.
+
+2. **Detection & Analysis**  
+   - Centralize telemetry (logs, alerts).  
+   - Triage → validate → scope → classify (incident vs. event).  
+   - Use threat intelligence + MITRE ATT&CK mapping.
+
+3. **Containment, Eradication, Recovery**  
+   - Short-term containment and evidence capture.  
+   - Remove root cause, patch/harden systems.  
+   - Recover to a known-good state and enhance monitoring.
+
+4. **Post-Incident Activity (Continuous Improvement)**  
+   - Capture lessons learned, identify control gaps, and update detections/playbooks.  
+   - Track metrics (MTTD/MTTR, false-positive rates).
+
+---
+
+## 🧭 2) Roles & Responsibilities
+| Role | Primary Duties | Backup |
+|------|----------------|--------|
+| IR Lead | Declare severity, approve containment, handle external comms | Deputy / On-call L2 |
+| Tier 1 Analyst | Validate alerts, open tickets, collect initial evidence | Any analyst |
+| Tier 2/3 Investigator | Hunt, scope, plan containment, manage evidence | IR Lead |
+| Communications | Stakeholder updates, legal/PR coordination | IR Lead |
+| Forensics | Imaging, chain of custody, timeline reconstruction | Investigator |
+
+---
+
+## 🚦 3) Severity & Classification
+| Severity | Definition | Initial Actions |
+|-----------|-------------|-----------------|
+| **SEV-1** | Ongoing compromise, major impact | Isolate hosts, IR war room |
+| **SEV-2** | Confirmed compromise | Contain + forensic capture |
+| **SEV-3** | Suspicious behavior | Monitor + targeted hunting |
+| **SEV-4** | False positive | Tune rule + close |
+
+**Classification Tags:** `Phishing`, `Malware`, `Ransomware`, `Privilege Abuse`, `Data Exfil`, `C2`, `Insider Threat`
+
+---
+
+## 🧰 4) Preparation Checklist
+- [ ] SIEM connected to critical log sources  
+- [ ] SOAR playbooks tested  
+- [ ] Ticketing templates ready  
+- [ ] Contact trees updated  
+- [ ] Evidence handling SOP verified  
+- [ ] Tabletop exercise completed  
+
+---
+
+## 🔎 5) Detection & Triage (Quick Flow)
+1. Acknowledge alert → timestamp + owner  
+2. Validate → false positive? context?  
+3. Scope → hosts/users/infrastructure  
+4. Classify + SEV  
+5. Decide: monitor vs contain  
+
+---
+
+## 🧪 6) Practical Queries (Windows + Splunk SPL)
+
+### 🪟 Windows (PowerShell)
 
 ```powershell
 # Failed logons (4625)
