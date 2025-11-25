@@ -10,6 +10,11 @@
 |-----|--------|----------|--------|
 | **Day 1** | SOC Orientation | Learned SOC structure (Tier 1–3), roles of SIEM/SOAR/MDR, reviewed NIST SP 800-61 Rev 3, set up GitHub repo for documentation. | ✅ Completed |
 | **Day 2** | Git Workflow + Log Fundamentals | Practiced Git branching and pushing to GitHub. Explored Windows Event Viewer  created log-fundamentals notes and screenshots. | ✅ Completed |
+### 🖼️ Day 2 – Event Viewer Screenshots
+
+![Custom Event Viewer Screenshot](Screenshots/Day%202%20Custom%20Eventvwr.png)
+![Critical Security Logs Screenshot](Screenshots/Day%202%20Eventvwr%20Critical%20Security%20Logs.jpg)
+
 | **Day 3** | Splunk Installation | Installed Splunk Free, indexed Windows logs, ran basic SPL searches (`stats count by host`, `EventCode=4625`), documented setup. | 🟢 In Progress |
 | **Day 4** | Splunk Dashboards + Alerts | Create dashboards for failed logins / PowerShell events, configure email alert rules, and capture screenshots. | ⬜ Pending |
 | **Day 5** | Detection Rules + MITRE ATT&CK | Map detections to ATT&CK tactics (Initial Access, Execution), create custom SPL correlation rules, test and document results. | ⬜ Pending |
