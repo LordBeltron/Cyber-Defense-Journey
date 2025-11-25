@@ -12,6 +12,9 @@
 | **Day 2** | Git Workflow + Log Fundamentals | Practiced Git branching and pushing to GitHub. Explored Windows Event Viewer  created log-fundamentals notes and screenshots. | ✅ Completed |
 ### 🖼️ Day 2 – Event Viewer Screenshots
 
+| Day | Focus | Summary | Status |
+|-----|--------|----------|--------|
+
 ![Custom Event Viewer Screenshot](Screenshots/Day%202%20Custom%20Eventvwr.png)
 ![Critical Security Logs Screenshot](Screenshots/Day%202%20Eventvwr%20Critical%20Security%20Logs.jpg)
 
