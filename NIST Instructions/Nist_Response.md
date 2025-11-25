@@ -93,10 +93,12 @@ Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 100 |
 
 ```powershell
 # Failed logons (4625)
-Get-WinEvent ...
+Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4625} -MaxEvents 100 |
+  Select TimeCreated, Id, ProviderName, @{n='User';e={$_.Properties[5].Value}}, Message
 
 # PowerShell Script Block Logging (4104)
-Get-WinEvent ...
+Get-WinEvent -FilterHashtable @{LogName='Microsoft-Windows-PowerShell/Operational'; Id=4104} |
+  Select TimeCreated, Id, Message
 
 # Local admins
 net localgroup administrators
