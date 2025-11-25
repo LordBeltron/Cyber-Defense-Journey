@@ -119,6 +119,8 @@ Get-Process | Sort-Object CPU -desc | Select -First 15 Name, Id, CPU
 
 ```
 
+</details>
+
 ---
 
 </details>
