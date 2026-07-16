@@ -61,7 +61,7 @@ Simulates employee termination or account suspension.
 
 ### Screenshot
 
-![Disable User](Screenshots/02-disable-user.png)
+![Disable User](Screenshots/03-user-disable-verification.png)
 
 ---
 
@@ -75,7 +75,7 @@ Demonstrates proper account lifecycle management and organizational separation.
 
 ### Screenshot
 
-![Disabled User OU Move](Screenshots/03-disabled-user-ou-move.png)
+![Disabled User OU Move](Screenshots/04-disabled-user-ou-move.png)
 
 ---
 
@@ -89,7 +89,7 @@ Simulates employee reinstatement or internal transfer.
 
 ### Screenshot
 
-![User Reactivation](Screenshots/04-user-reactivation.png)
+![User Reactivation](Screenshots/05-user-reactivation-verification.png)
 
 ---
 
@@ -113,7 +113,7 @@ Validates Role-Based Access Control (RBAC) assignments.
 
 ### Screenshot
 
-![RBAC Verification](Screenshots/05-rbac-membership-verification.png)
+![RBAC Verification](Screenshots/06-rbac-membership-verification.png)
 
 ---
 
@@ -131,7 +131,7 @@ Demonstrates device identity management within Active Directory.
 
 ### Screenshot
 
-![Computer Object Creation](Screenshots/06-computer-object-creation.png)
+![Computer Object Creation](Screenshots/07-computer-object-creation.png)
 
 ---
 
@@ -149,7 +149,7 @@ Introduces Active Directory object auditing techniques.
 
 ### Screenshot
 
-![Computer Object Audit](Screenshots/07-computer-object-audit.png)
+![Computer Object Audit](Screenshots/08-computer-object-audit.png)
 
 ---
 
@@ -167,7 +167,7 @@ Demonstrates organizational management and Group Policy preparation.
 
 ### Screenshot
 
-![Computer OU Move](Screenshots/08-computer-ou-move.png)
+![Computer OU Move](Screenshots/09-computer-ou-move.png)
 
 ---
 
@@ -187,7 +187,7 @@ Demonstrates targeted searches and administrative auditing.
 
 ### Screenshot
 
-![OU Targeted Auditing](Screenshots/09-ou-targeted-auditing.png)
+![OU Targeted Auditing](Screenshots/10-ou-targeted-auditing.png)
 
 ---
 
@@ -206,7 +206,7 @@ Introduces account lifecycle auditing and security review procedures.
 
 ### Screenshot
 
-![Disabled Account Audit](Screenshots/10-disabled-account-audit.png)
+![Disabled Account Audit](Screenshots/11-disabled-account-audit.png)
 
 ---
 
@@ -232,7 +232,7 @@ Created a new employee:
 
 ### Screenshot
 
-![New User Onboarding](Screenshots/11-new-user-onboarding.png)
+![New User Onboarding](Screenshots/12-new-user-onboarding.png)
 
 ---
 
